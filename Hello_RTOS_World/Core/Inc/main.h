@@ -27,7 +27,7 @@ void SystemClockConfig(void);
 void vTask1_Handler(void *params);
 void vTask2_Handler(void *params);
 void prvUART2Init(void);
-void prvUART4Init(void);
+void printmsg(char *msg);
 void Error_handler(void);
 
 

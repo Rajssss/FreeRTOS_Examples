@@ -75,9 +75,6 @@ void SystemClockConfig(void)
 //Task1 Handler
 void vTask1_Handler(void *params)
 {
-	memset(pData, 0, sizeof(pData));
-	sprintf(pData, "Task1 Running.\n\r");
-
 	while(1)
 	{
 		/*
@@ -90,23 +87,17 @@ void vTask1_Handler(void *params)
 		if(UART_ACCESS_KEY == AVAILABLE)
 		{
 			UART_ACCESS_KEY = NOT_AVAILABLE;
-			taskDISABLE_INTERRUPTS();
-			HAL_UART_Transmit(&UART2Init, (uint8_t *)pData, strlen(pData), HAL_MAX_DELAY);
+			printmsg("Task1\r\n");
 			UART_ACCESS_KEY = AVAILABLE;
 			taskYIELD();
-			taskENABLE_INTERRUPTS();
 		}
 	}
-	memset(pData, 0, sizeof(pData));
 }
 
 
 //Task2 Handler
 void vTask2_Handler(void *params)
 {
-	memset(pData, 0, sizeof(pData));
-	sprintf(pData, "Task2 Running.\n\r");
-
 	while(1)
 	{
 		/*
@@ -118,15 +109,12 @@ void vTask2_Handler(void *params)
 		 */
 		if(UART_ACCESS_KEY == AVAILABLE)
 		{
-			taskDISABLE_INTERRUPTS();
 			UART_ACCESS_KEY = NOT_AVAILABLE;
-			HAL_UART_Transmit(&UART2Init, (uint8_t *)pData, strlen(pData), HAL_MAX_DELAY);
+			printmsg("Task2\r\n");
 			UART_ACCESS_KEY = AVAILABLE;
 			taskYIELD();
-			taskENABLE_INTERRUPTS();
 		}
 	}
-	memset(pData, 0, sizeof(pData));
 }
 
 
@@ -134,6 +122,13 @@ void vTask2_Handler(void *params)
 void Error_handler(void)
 {
 	while(1);
+}
+
+
+
+void printmsg(char *msg)
+{
+	HAL_UART_Transmit(&UART2Init, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
 }
 
 
