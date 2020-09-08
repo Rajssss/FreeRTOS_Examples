@@ -42,8 +42,17 @@ int main(void)
 	printf("Application Started.\n\r");
 #endif
 
+	//SEGGER SystemView
+	DWT->CTRL |= (1 << 0);		 //Enable Cycle Counter
+
 	//Initialize UART2
 	prvUART2Init();
+
+	//Initialise SystemView Config
+	SEGGER_SYSVIEW_Conf();
+
+	//Start SystemView Capture
+	SEGGER_SYSVIEW_Start();
 
 	//create two tasks
 	xTaskCreate(vTask1_Handler, "Task1", configMINIMAL_STACK_SIZE, NULL, 2, &xTask1_Handle);
