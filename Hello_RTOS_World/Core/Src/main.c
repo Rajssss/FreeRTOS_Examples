@@ -5,7 +5,8 @@
  *      Author: Raj.S
  *      Description: FreeRTOS Hello world Example.
  *      			 This examples creates two Tasks to transmit data via UART2 and
- *      			 schedule it with equal priority then start it.
+ *      			 schedule it with equal priority then start it. SEGGER SystemView is
+ *      			 implemented to get the Real Time/SIngle Shot Trace of the tasks.
  *
  *
  */
@@ -24,7 +25,7 @@ TaskHandle_t xTask2_Handle = NULL;
 UART_HandleTypeDef UART2Init;
 
 #ifdef SEMIHOSTING_ENABLE
-//semihosting
+//Semihosting
 extern void initialise_monitor_handles(void);
 #endif
 
@@ -98,6 +99,7 @@ void vTask1_Handler(void *params)
 			UART_ACCESS_KEY = NOT_AVAILABLE;
 			printmsg("Task1\r\n");
 			UART_ACCESS_KEY = AVAILABLE;
+			traceISR_EXIT_TO_SCHEDULER();		//Track ISR entry and exit for SystemView Trace
 			taskYIELD();
 		}
 	}
@@ -121,6 +123,7 @@ void vTask2_Handler(void *params)
 			UART_ACCESS_KEY = NOT_AVAILABLE;
 			printmsg("Task2\r\n");
 			UART_ACCESS_KEY = AVAILABLE;
+			traceISR_EXIT_TO_SCHEDULER();		//Track ISR entry and exit for SystemView Trace
 			taskYIELD();
 		}
 	}
