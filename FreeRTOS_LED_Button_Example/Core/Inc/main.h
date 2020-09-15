@@ -19,4 +19,9 @@
 #include "stm32f4xx_hal.h"
 
 
+//Prototypes
+void vTask_LED_Handler(void *param);
+void vTask_Button_Handler(void *param);
+void prvGPIOInit(void);
+
 #endif /* INC_MAIN_H_ */

@@ -498,6 +498,7 @@ void xPortSysTickHandler( void )
 		/* Increment the RTOS tick. */
 		if( xTaskIncrementTick() != pdFALSE )
 		{
+			//CUBE-HAL Inc Tick and process the Interrupt
 			HAL_IncTick();
 			HAL_SYSTICK_IRQHandler();
 			/* A context switch is required.  Context switching is performed in
