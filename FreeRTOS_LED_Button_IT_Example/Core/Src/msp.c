@@ -10,7 +10,7 @@
 
 void prvGPIOInit(void)
 {
-	//Initialize On-Board User LED and Button
+	//Initialize On-Board User LED and Button with IT
 
 	GPIO_InitTypeDef GPIO_UserLED = {0};
 	GPIO_InitTypeDef GPIO_UserButton = {0};
@@ -28,12 +28,16 @@ void prvGPIOInit(void)
 	HAL_GPIO_Init(GPIOA, &GPIO_UserLED);
 
 	//Button
-	GPIO_UserButton.Mode = GPIO_MODE_INPUT;
+	GPIO_UserButton.Mode = GPIO_MODE_IT_FALLING;
 	GPIO_UserButton.Pull = GPIO_NOPULL;
 	GPIO_UserButton.Speed = GPIO_SPEED_LOW;
 	GPIO_UserButton.Pin = GPIO_PIN_13;
 
 	HAL_GPIO_Init(GPIOC, &GPIO_UserButton);
+
+	//Enable Interrupts on GPIOC13
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 15, 0);
+	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
