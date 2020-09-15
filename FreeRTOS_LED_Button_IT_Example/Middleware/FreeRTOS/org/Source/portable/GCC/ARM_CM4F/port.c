@@ -498,9 +498,6 @@ void xPortSysTickHandler( void )
 		/* Increment the RTOS tick. */
 		if( xTaskIncrementTick() != pdFALSE )
 		{
-			//CUBE-HAL Inc Tick and process the Interrupt
-			HAL_IncTick();
-			HAL_SYSTICK_IRQHandler();
 			/* A context switch is required.  Context switching is performed in
 			the PendSV interrupt.  Pend the PendSV interrupt. */
 			portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;

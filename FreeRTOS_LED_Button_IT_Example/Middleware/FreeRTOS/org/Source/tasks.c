@@ -2720,6 +2720,10 @@ BaseType_t xSwitchRequired = pdFALSE;
 		block. */
 		const TickType_t xConstTickCount = xTickCount + ( TickType_t ) 1;
 
+		//CUBE-HAL Inc Tick and process the Interrupt
+		HAL_IncTick();
+		HAL_SYSTICK_IRQHandler();
+
 		/* Increment the RTOS tick, switching the delayed and overflowed
 		delayed lists if it wraps to 0. */
 		xTickCount = xConstTickCount;

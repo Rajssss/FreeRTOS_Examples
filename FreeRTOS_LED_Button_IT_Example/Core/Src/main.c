@@ -28,6 +28,8 @@ uint8_t buttonPressed = RESET;
 
 int main(void)
 {
+	HAL_Init();
+
 	//Initialize GPIO for On-board User LED and Button
 	prvGPIOInit();
 
