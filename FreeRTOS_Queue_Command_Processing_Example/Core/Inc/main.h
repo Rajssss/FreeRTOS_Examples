@@ -27,6 +27,11 @@
 
 //Prototypes
 void prvGPIOInit(void);
+void prvLED_Toggle(void);
+void prvLED_Toggle_Start(void);
+void prvLED_Toggle_Stop(void);
+void prvRTC_GET_DATE_TIME(void);
+
 
 
 //Error Hanbdler
@@ -36,8 +41,7 @@ void Error_Handler(void);
 //task handlers
 void vTask1_menu_display(void *params);
 void vTask2_cmd_handling(void *params);
-void vTask3_cmd_processor(void *params);
-void vTask4_uart_write(void *params);
+void vTask3_uart_handler(void *params);
 
 
 #endif /* INC_MAIN_H_ */

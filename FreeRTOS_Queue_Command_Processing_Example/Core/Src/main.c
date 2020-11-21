@@ -26,13 +26,17 @@ extern void prvGPIOInit();
 //Task Handles
 TaskHandle_t Menu_handle = NULL;
 TaskHandle_t CMD_handle = NULL;
-TaskHandle_t CMD_Procesor_handle = NULL;
 TaskHandle_t UART_write_handle = NULL;
 
 
 //Queue Handle
 QueueHandle_t CMD_Queue = NULL;
 QueueHandle_t UART_WRITE_Queue = NULL;
+
+
+//Software Timer Handle
+TimerHandle_t LED_Toggle_Timer_Handle;
+
 
 
 //Command Structure
@@ -48,8 +52,8 @@ char CMD_menu[]= {
 	"FreeRTOS Queue Command Processing\r\n"
 	"1. LED On\r\n"
 	"2. LED OFF\r\n"
-	"3. LED TOGGLE_ON\r\n"
-	"4. LED TOGGLE_OFF\r\n"
+	"3. LED BLINK_ON\r\n"
+	"4. LED BLINK_OFF\r\n"
 	"5. RTC_PRINT_DATE_TIME\r\n"
 	"6. EXIT_APP\r\n"
 	"Enter your selection number => "};
@@ -63,6 +67,8 @@ int main(void)
 
 	//Retarget STDIO to UART2
 	RetargetInit(USART2);
+
+	//printf("UART Init Done!\n");
 
 
 	//Queues (Must be created before starting the scheduler)
@@ -81,9 +87,8 @@ int main(void)
 
 	//Tasks
 	xTaskCreate(vTask1_menu_display, "UART-Menu-Task", 500, NULL, 1, &Menu_handle);
-	xTaskCreate(vTask2_cmd_handling, "UART-CMD-Task", 500, NULL, 1, &CMD_handle);
-	xTaskCreate(vTask3_cmd_processor, "UART-CMD_Processor-Task", 500, NULL, 1, &CMD_Procesor_handle);
-	xTaskCreate(vTask4_uart_write, "UART-Write-Task", 500, NULL, 1, &UART_write_handle);
+	xTaskCreate(vTask2_cmd_handling, "UART-CMD-Handler-Task", 500, NULL, 1, &CMD_handle);
+	xTaskCreate(vTask3_uart_handler, "UART-Handler-Task", 500, NULL, 1, &UART_write_handle);
 
 
 	//Start Scheduler
@@ -117,39 +122,125 @@ void vTask1_menu_display(void *params)
 
 void vTask2_cmd_handling(void *params)
 {
+	APP_CMD_ty *newCMD;
 
 	while(1)
 	{
 		xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-		xQueueSend(CMD_Queue, &sel, portMAX_DELAY);
+
+		xQueueReceive(CMD_Queue, &newCMD, portMAX_DELAY);
+
+		switch (newCMD->CMD_NUM)
+		{
+			case 1:
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+				xTaskNotify(Menu_handle, 0, eNoAction);
+				break;
+
+			case 2:
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+				xTaskNotify(Menu_handle, 0, eNoAction);
+				break;
+
+			case 3:
+				prvLED_Toggle_Start();
+				xTaskNotify(Menu_handle, 0, eNoAction);
+				break;
+
+			case 4:
+				prvLED_Toggle_Stop();
+				xTaskNotify(Menu_handle, 0, eNoAction);
+				break;
+
+			case 5:
+				//prvRTC_GET_DATE_TIME();
+				xTaskNotify(Menu_handle, 0, eNoAction);
+				break;
+
+			case 6:
+				//Exit the Application
+				break;
+
+			default:
+				xTaskNotify(Menu_handle, 0, eNoAction);
+				break;
+
+		}
+
+		//vPortFree(newCMD);
+
 	}
 }
 
 
-void vTask3_cmd_processor(void *params)
-{
-	APP_CMD_ty *newCMD = NULL;
-
-	while(1)
-	{
-
-	}
-}
 
 
-void vTask4_uart_write(void *params)
+
+void vTask3_uart_handler(void *params)
 {
 	char *pData = NULL;
-	APP_CMD_ty *newCMD = NULL;
+	APP_CMD_ty *newCMD = (APP_CMD_ty *) pvPortMalloc(sizeof(APP_CMD_ty));
 
 	while(1)
 	{
 		xQueueReceive(UART_WRITE_Queue, &pData, portMAX_DELAY);
 		printf(pData);
-		scanf("%d", newCMD->CMD_NUM);
+		scanf("%d", &newCMD->CMD_NUM);
+
+		xQueueSend(CMD_Queue, &newCMD, portMAX_DELAY);
+
 		xTaskNotify(CMD_handle, 0, eNoAction);
-		xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
+		//xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
 	}
+
 }
+
+
+
+
+void prvLED_Toggle_Start()
+{
+	if(LED_Toggle_Timer_Handle == NULL)
+	{
+		LED_Toggle_Timer_Handle = xTimerCreate("LED-Toggle-Timer", 100, pdTRUE, NULL, prvLED_Toggle);
+
+		xTimerStart(LED_Toggle_Timer_Handle, portMAX_DELAY);
+	}
+
+	else
+	{
+		xTimerStart(LED_Toggle_Timer_Handle, portMAX_DELAY);
+
+	}
+
+}
+
+
+
+void prvLED_Toggle(void)
+{
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+}
+
+
+
+
+void prvLED_Toggle_Stop()
+{
+	xTimerStop(LED_Toggle_Timer_Handle, portMAX_DELAY);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+}
+
+
+
+
+
+void prvRTC_GET_DATE_TIME(void)
+{
+
+
+}
+
+
 
 
